@@ -1,55 +1,8 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 
-function BookCard({ book, onClick }) {
-  const v = book.volumeInfo;
-  const thumb = v.imageLinks?.thumbnail?.replace("http", "https");
-
-  return (
-    <div className="card" onClick={() => onClick(book)}>
-      <div className="card-inner">
-        <div className="cover-wrap">
-          {thumb
-            ? <img src={thumb} alt={v.title} loading="lazy" />
-            : <div className="no-cover">{v.title}</div>}
-          <div className="cover-overlay" />
-        </div>
-        <div className="info">
-          <div className="title">{v.title}</div>
-          {v.subtitle && <div className="subtitle">{v.subtitle}</div>}
-          <div className="authors">{v.authors?.join(", ")}</div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function Modal({ book, onClose }) {
-  if (!book) return null;
-  const v = book.volumeInfo;
-  const thumb = v.imageLinks?.thumbnail?.replace("http", "https");
-
-  return (
-    <div className="modal-backdrop active" onClick={(e) => e.target.classList.contains("modal-backdrop") && onClose()}>
-      <div className="modal">
-        {thumb && <div className="modal-cover"><img src={thumb} alt={v.title} /></div>}
-        <div className="modal-body">
-          <span className="modal-label">Now Featuring</span>
-          <h2 className="modal-title">{v.title}</h2>
-          {v.subtitle && <p className="modal-subtitle">{v.subtitle}</p>}
-          <div className="divider" />
-          <p className="modal-authors">{v.authors?.join(", ")}</p>
-          <p className="modal-description">{v.description || "No description available."}</p>
-        </div>
-        <button className="modal-close" onClick={onClose}>✕</button>
-      </div>
-    </div>
-  );
-}
-
 function App() {
   const [books, setBooks] = useState([]);
-  const [selected, setSelected] = useState(null);
 
   useEffect(() => {
     fetch("https://api.freeapi.app/api/v1/public/books")
@@ -60,17 +13,45 @@ function App() {
 
   return (
     <>
-      <header>
-        <h1>The Reading Room</h1>
-        <p>A curated collection of books</p>
-        <div className="shelf-line" />
-      </header>
+      <nav className="navbar">
+        <span className="navbar-brand">Book Through</span>
+        <div className="navbar-dot" />
+        <span className="navbar-tagline">Your Reading Universe</span>
+        <div className="navbar-line" />
+      </nav>
+
+      <div className="page-header">
+        <h2>The <em>Collection</em></h2>
+        <span>Hover to explore</span>
+      </div>
+      <div className="page-divider" />
+
       <div className="grid">
-        {books.map((book) => (
-          <BookCard key={book.id} book={book} onClick={setSelected} />
+        {books.map((book, i) => (
+          <div
+            key={book.id}
+            className="card"
+            style={{ animationDelay: `${i * 0.04}s` }}
+          >
+            <div className="card-thumb-wrap">
+              <img
+                className="card-thumb"
+                src={book.volumeInfo.imageLinks?.thumbnail?.replace("http", "https")}
+                alt="Book Cover"
+              />
+            </div>
+            <div className="card-info">
+              <h2 className="card-title">{book.volumeInfo.title}</h2>
+              <h3 className="card-subtitle">{book.volumeInfo.subtitle}</h3>
+              <span className="card-authors">{book.volumeInfo.authors?.join(", ")}</span>
+              <div className="card-desc-wrap">
+                <div className="card-divider" />
+                <p className="card-desc">{book.volumeInfo.description}</p>
+              </div>
+            </div>
+          </div>
         ))}
       </div>
-      <Modal book={selected} onClose={() => setSelected(null)} />
     </>
   );
 }
