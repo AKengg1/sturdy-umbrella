@@ -3,13 +3,24 @@ import "./App.css";
 
 function App() {
   const [books, setBooks] = useState([]);
+  const [selected, setSelected] = useState(null);
 
   useEffect(() => {
     fetch("https://api.freeapi.app/api/v1/public/books")
-      .then((r) => r.json())
+      .then((response) => response.json())
       .then((data) => setBooks(data.data.data))
       .catch(console.error);
   }, []);
+
+  const open = (book) => {
+    setSelected(book);
+    document.body.style.overflow = "hidden";
+  };
+
+  const close = () => {
+    setSelected(null);
+    document.body.style.overflow = "";
+  };
 
   return (
     <>
@@ -22,7 +33,7 @@ function App() {
 
       <div className="page-header">
         <h2>The <em>Collection</em></h2>
-        <span>Hover to explore</span>
+        <span>Click to explore</span>
       </div>
       <div className="page-divider" />
 
@@ -32,6 +43,7 @@ function App() {
             key={book.id}
             className="card"
             style={{ animationDelay: `${i * 0.04}s` }}
+            onClick={() => open(book)}
           >
             <div className="card-thumb-wrap">
               <img
@@ -44,13 +56,44 @@ function App() {
               <h2 className="card-title">{book.volumeInfo.title}</h2>
               <h3 className="card-subtitle">{book.volumeInfo.subtitle}</h3>
               <span className="card-authors">{book.volumeInfo.authors?.join(", ")}</span>
-              <div className="card-desc-wrap">
-                <div className="card-divider" />
-                <p className="card-desc">{book.volumeInfo.description}</p>
-              </div>
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Modal */}
+      <div className={`modal-overlay ${selected ? "open" : ""}`} onClick={close}>
+        <div className="modal" onClick={(e) => e.stopPropagation()}>
+          {selected && (
+            <>
+              <div className="modal-hero">
+                <img
+                  src={selected.volumeInfo.imageLinks?.thumbnail?.replace("http", "https")}
+                  alt="Book Cover"
+                />
+                <div className="modal-hero-gradient" />
+                <div className="modal-hero-title">
+                  <h2>{selected.volumeInfo.title}</h2>
+                  {selected.volumeInfo.subtitle && (
+                    <p>{selected.volumeInfo.subtitle}</p>
+                  )}
+                </div>
+                <button className="modal-close" onClick={close}>✕</button>
+              </div>
+              <div className="modal-body">
+                <p className="modal-authors">
+                  {selected.volumeInfo.authors?.join(", ")}
+                </p>
+                <div className="modal-divider" />
+                {selected.volumeInfo.description ? (
+                  <p className="modal-desc">{selected.volumeInfo.description}</p>
+                ) : (
+                  <p className="modal-no-desc">No description available.</p>
+                )}
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </>
   );
