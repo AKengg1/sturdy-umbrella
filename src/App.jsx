@@ -4,12 +4,14 @@ import "./App.css";
 function App() {
   const [books, setBooks] = useState([]);
   const [selected, setSelected] = useState(null);
-  const [page, setpage]=useState(1)
+  const [page, setpage] = useState(1);
+const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     fetch(`https://api.freeapi.app/api/v1/public/books?page=${page}`)
       .then((res) => res.json())
-      .then((data) => setBooks(data.data.data))
+      .then((data) => {setBooks(data.data.data); 
+        setTotalPages(data.data.totalPages);})
       .catch(console.error);
   }, [page]);
 
@@ -28,7 +30,10 @@ function App() {
   return (
     <>
       {/* Background blur layer — sits behind modal, above page content */}
-      <div className={`page-blur-layer ${selected ? "active" : ""}`} onClick={close} />
+      <div
+        className={`page-blur-layer ${selected ? "active" : ""}`}
+        onClick={close}
+      />
 
       <nav className="navbar">
         <span className="navbar-brand">Book Through</span>
@@ -38,7 +43,9 @@ function App() {
       </nav>
 
       <div className="page-header">
-        <h2>The <em>Collection</em></h2>
+        <h2>
+          The <em>Collection</em>
+        </h2>
         <span>Click to explore</span>
       </div>
       <div className="page-divider" />
@@ -71,7 +78,10 @@ function App() {
       </div>
 
       {/* Modal */}
-      <div className={`modal-overlay ${selected ? "open" : ""}`} onClick={close}>
+      <div
+        className={`modal-overlay ${selected ? "open" : ""}`}
+        onClick={close}
+      >
         <div className="modal" onClick={(e) => e.stopPropagation()}>
           {selected && (
             <>
@@ -85,7 +95,9 @@ function App() {
                   <h2>{info.title}</h2>
                   {info.subtitle && <p>{info.subtitle}</p>}
                 </div>
-                <button className="modal-close" onClick={close}>✕</button>
+                <button className="modal-close" onClick={close}>
+                  ✕
+                </button>
               </div>
 
               <div className="modal-body">
@@ -101,7 +113,9 @@ function App() {
                 {info.categories?.length > 0 && (
                   <div className="modal-tags">
                     {info.categories.map((cat) => (
-                      <span key={cat} className="modal-tag">{cat}</span>
+                      <span key={cat} className="modal-tag">
+                        {cat}
+                      </span>
                     ))}
                   </div>
                 )}
@@ -111,22 +125,26 @@ function App() {
                     {info.publishedDate && (
                       <div className="modal-meta-item">
                         <span className="modal-meta-label">Published</span>
-                        <span className="modal-meta-value">{info.publishedDate}</span>
+                        <span className="modal-meta-value">
+                          {info.publishedDate}
+                        </span>
                       </div>
                     )}
-      
+
                     {info.language && (
                       <div className="modal-meta-item">
                         <span className="modal-meta-label">Language</span>
-                        <span className="modal-meta-value">{info.language.toUpperCase()}</span>
+                        <span className="modal-meta-value">
+                          {info.language.toUpperCase()}
+                        </span>
                       </div>
                     )}
                   </div>
                 )}
 
                 {info.previewLink && (
-                  
-                    <a className="modal-preview-btn"
+                  <a
+                    className="modal-preview-btn"
                     href={info.previewLink}
                     target="_blank"
                     rel="noreferrer"
@@ -139,16 +157,35 @@ function App() {
           )}
         </div>
       </div>
-      {page<22?(
       <div className="page-change">
-        
-        <span>Page {page}</span>
-            <button className="modal-preview-btn" disabled={page === 1} onClick={()=>{setpage(page-1)}}>Previous</button>
-            <button className="modal-preview-btn" onClick={()=>{setpage(page+1)}}>Next</button>
-        </div>):(<div><h2 className="page-end">THIS IS THE LAST PAGE, <em>THANK YOU!!</em></h2>
-        <button className="modal-preview-btn" disabled={page === 1} onClick={()=>{setpage(page-1)}}>Previous</button>
-        <button disabled={page === 22} className="modal-preview-btn" onClick={()=>{setpage(page+1)}}>Next</button>
-        </div>)}
+
+  {Array.from({ length: totalPages }, (_, i) => (
+    <button
+      key={i + 1}
+      className={`page-num-btn ${page === i + 1 ? "active" : ""}`}
+      onClick={() => setpage(i + 1)}
+    >
+      {i + 1}
+    </button>
+  ))}
+
+ 
+<button
+    className="modal-preview-btn"
+    disabled={page === 1}
+    onClick={() => setpage(page - 1)}
+  >
+    ← Previous
+  </button>
+  <button
+    className="modal-preview-btn"
+    disabled={page === totalPages}
+    onClick={() => setpage(page + 1)}
+  >
+    Next →
+  </button>
+</div>
+      
     </>
   );
 }
