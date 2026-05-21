@@ -4,13 +4,14 @@ import "./App.css";
 function App() {
   const [books, setBooks] = useState([]);
   const [selected, setSelected] = useState(null);
+  const [page, setpage]=useState(1)
 
   useEffect(() => {
-    fetch("https://api.freeapi.app/api/v1/public/books")
+    fetch(`https://api.freeapi.app/api/v1/public/books?page=${page}`)
       .then((res) => res.json())
       .then((data) => setBooks(data.data.data))
       .catch(console.error);
-  }, []);
+  }, [page]);
 
   const open = (book) => {
     setSelected(book);
@@ -138,6 +139,16 @@ function App() {
           )}
         </div>
       </div>
+      {page<22?(
+      <div className="page-change">
+        
+        <span>Page {page}</span>
+            <button className="modal-preview-btn" disabled={page === 1} onClick={()=>{setpage(page-1)}}>Previous</button>
+            <button className="modal-preview-btn" onClick={()=>{setpage(page+1)}}>Next</button>
+        </div>):(<div><h2 className="page-end">THIS IS THE LAST PAGE, <em>THANK YOU!!</em></h2>
+        <button className="modal-preview-btn" disabled={page === 1} onClick={()=>{setpage(page-1)}}>Previous</button>
+        <button disabled={page === 22} className="modal-preview-btn" onClick={()=>{setpage(page+1)}}>Next</button>
+        </div>)}
     </>
   );
 }
